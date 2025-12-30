@@ -130,19 +130,39 @@ run_study_pipeline <- function(
   # -------------------------------------------------------------------
   # User-defined mutation + default column selection
   # -------------------------------------------------------------------
-  final <- final %>% process_final_data(study=studyid,
-                                        user_mutate = list(
-                                          NEW_FLAG = expr(if_else(DV > 10, 1, 0))
-                                        )
-  )
+
+  final %>%
+    mutate(
+      STUDY  = 1,
+      PTNM  = {
+        id_digits <- str_replace_all(USUBJID, "[^0-9]", "")
+        as.numeric(paste0(1,str_sub(id_digits, -4)))
+      },
+      ANALYTE = if_else(EVID == 0, PCTESTCD, EXTRT),
+      TYPE  = "PK",
+      CRCL  = cg_creatinine_clearance(SEX, AGE, WEIGHT, WEIGHTU, CREAT, CREATU),
+      CRCLU  = "mL/min",
+      AMT   = if_else(EVID == 1, DOSE * 1000, NA_real_),
+      AMTU  = "ng",
+      BLQFL  = if_else(str_detect(PCORRES, "BLQ"), 1, 0),
+      DV   = if_else(BLQFL == 1 & ATAFD < 0, 0, PCSTRESN),
+      DVU   = PCSTRESU,
+      DVC   = PCORRES,
+      DVCU  = PCORRESU,
+      DATE  = coalesce(PCDTC, EXSTDTC),
+      ATAD  = if_else(EVID==0,as.numeric(difftime(PCDTCN, MEXSTDTCN, units = "hours")),as.numeric(difftime(EXSTDTCN, MEXSTDTCN, units = "hours")))
+    )
 
 
   default_select_cols =c(
     "STUDYID","STUDY","USUBJID","PTNM","ANALYTE","TIME","ATAFD","DATE",
-    "EVID","DV","DVU","DVC","DVCU","BLQFL","ARM","ARMN","DOSE",
-    "DOSEU","AMT","DOSFRM","DOSFRMN","DOSFRQ","DOSFRQN","ROUTE",
-    "ROUTEN","WEIGHT","WEIGHTU","SEX","SEXN","RACE","RACEN",
+    "EVID","DV","DVU","DVC","DVCU","BLQFL","ARM","DOSE",
+    "DOSEU","AMT","DOSFRM","DOSFRQ","ROUTE",
+    "WEIGHT","WEIGHTU","SEX","RACE",
     "AGE","AGEU","HEIGHT","HEIGHTU","CREAT","CREATU","CRCL","CRCLU")
+
+
+  final<-final %>% select(any_of(default_select_cols))%>%arrange(USUBJID,ATAFD,TIME)
 
   # -------------------------------------------------------------------
   # Apply user ordering + automatic ordering
@@ -150,7 +170,7 @@ run_study_pipeline <- function(
 
   user_orders=NULL
   auto_cols   = c("ARM","DOSFRQ","ROUTE","SEX","RACE","ETHNIC","COUNTRY","POP", "FORM")
-  poppkdata <-map_columns_hybrid(final,user_orders, auto_cols, overwrite = TRUE,drop_original = TRUE)
+  poppkdata <-map_columns_hybrid(final,user_orders, auto_cols, overwrite = F,drop_original = F)
   auto_cols   = "USUBJID"
   poppkdata <-map_columns_hybrid(final,NULL, auto_cols)
 
@@ -160,9 +180,6 @@ run_study_pipeline <- function(
 
   write.csv(poppkdatacsv, file.path(projpath, "derived", "poppkdata.csv"), row.names = FALSE, na = "")
 
-  if(is.null(debug)){
-    final<-final %>% select(any_of(default_select_cols))%>%arrange(USUBJID,ATAFD,TIME)
-  }
 
   # Create data definition
   #metadata <- create_data_definition(final, exclude_vars = c("USUBJID","DATE","DVC"))
