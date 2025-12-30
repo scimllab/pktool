@@ -23,7 +23,7 @@ run_study_pipeline <- function(
   ex <- process_domain(
     "ex.xpt", projpath,
     datetime_var = "EXSTDTC",
-    rename_list =   ex_rename_list = c(
+    rename_list =   c(
       DOSFRM = "EXDOSFRM",
       ROUTE = "EXROUTE",
       DOSFRQ = "EXDOSFRQ",

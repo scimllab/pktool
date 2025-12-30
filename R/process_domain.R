@@ -22,7 +22,7 @@ process_domain <- function(file_name,
                            drop_vars=NULL,
                            mutate_expr =NULL) {
 
-  df <- read_sas(file.path(projpath, file_name))
+  df <- read_xpt(file.path(projpath, file_name))
 
   if (!is.null(datetime_var)) {
     df <- df %>%
