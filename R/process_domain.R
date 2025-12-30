@@ -23,9 +23,9 @@ process_domain <- function(file_name,
                            mutate_expr =NULL) {
 
   #df <- read_xpt(file.path(projpath, file_name))
-  if(grepl(".xpt",file_name,ignore.case = TRUE)){df<-lapply(file.path(projpath, file_name),read_xpt)}
-  else if(grepl(".sas7dat",file_name,ignore.case = TRUE)){df<-lapply(file.path(projpath, file_name),read_sas)}
-  else if(grepl(".csv",file_name,ignore.case = TRUE)){df<-lapply(file.path(projpath, file_name),read.csv)}
+  if(grepl(".xpt",file_name,ignore.case = TRUE)){df<-as.data.frame(lapply(file.path(projpath, file_name),read_xpt))}
+  else if(grepl(".sas7dat",file_name,ignore.case = TRUE)){df<--as.data.frame(lapply(file.path(projpath, file_name),read_sas))}
+  else if(grepl(".csv",file_name,ignore.case = TRUE)){df<--as.data.frame(lapply(file.path(projpath, file_name),read.csv))}
 
   if (!is.null(datetime_var)) {
     df <- df %>%
