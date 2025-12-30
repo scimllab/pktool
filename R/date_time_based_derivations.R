@@ -63,6 +63,26 @@ compute_first_dose <- function(df, subject_var = "USUBJID", date_var = "EXSTDTCN
 }
 
 #-------------------------------------------------------------------------------
+#' Compute Lead In
+#'
+#' @param df
+#' @param subject_var
+#' @param date_var
+#' @param lead_n
+#' @param new_var
+#'
+#' @return
+#' @export
+#'
+#' @examples
+compute_lead <- function(df, subject_var = "USUBJID", date_var = "EXSTDTCN", lead_n = 1, new_var = "EXSTDTCN_LEAD") {
+  df %>%
+    group_by(across(all_of(subject_var))) %>%
+    mutate("{new_var}" := lead(.data[[date_var]], n = lead_n)) %>%
+    ungroup()
+}
+
+#-------------------------------------------------------------------------------
 
 #' Actual Time Derivation
 #'
@@ -283,11 +303,3 @@ derive_NTIME <- function(
     select(-event_dt, -day_diff)
 }
 
-
-#-------------------------------------------------------------------------------
-
-
-#-------------------------------------------------------------------------------
-
-
-#-------------------------------------------------------------------------------
