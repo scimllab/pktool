@@ -1,0 +1,22 @@
+Package: pktool
+Title: A PK Functions To Create Population PK Dataset
+Version: 0.0.0.9000
+Authors@R: 
+    person("Jayesh", "Patel", , "jayeshpatel1001@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Utility functions for processing pharmacokinetic (PK) and clinical
+    trial data including datetime handling, derivations, mapping,
+    and domain-level processing.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.2
+Imports:
+    dplyr,
+    stringr,
+    purrr,
+    lubridate,
+    haven,
+    rlang,
+    glue
