@@ -37,7 +37,11 @@ map_columns_hybrid <- function(df,
   map_column <- function(df, col_name, values) {
 
     # Remove NA values from mapping
-    values_clean <- values[!is.na(values)]
+    #values_clean <- values[!is.na(values)]
+    values_clean <- values |>
+      as.character() |>
+      unique() |>
+      (\(x) x[!is.na(x) & nzchar(x)])()
     code_map <- create_code_map(values_clean, start)
     num_col <- paste0(col_name, suffix)
 

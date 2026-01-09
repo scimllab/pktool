@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-basechar <- function(df, group_col, date_col, ref_date_col, required_col, condition = NULL) {
+basechar_old <- function(df, group_col, date_col, ref_date_col, required_col, condition = NULL) {
   # Capture user-supplied columns as symbols
   group_col <- ensym(group_col)
   date_col <- ensym(date_col)
@@ -48,6 +48,80 @@ basechar <- function(df, group_col, date_col, ref_date_col, required_col, condit
     select(-latest_date_allowed) # optional: remove helper column
 
   return(df)
+}
+
+#-------------------------------------------------------------------------------
+#' Baseline Covariates
+#'
+#' @param df
+#' @param group_col
+#' @param date_col
+#' @param ref_date_col
+#' @param required_col
+#' @param analysis_col
+#' @param method
+#' @param condition
+#'
+#' @return
+#' @export
+#'
+#' @examples
+basechar <-function(df,
+         group_col,
+         date_col,
+         ref_date_col,
+         required_col,
+         analysis_col = NULL,
+         method = c("max_rowid", "avg_analysis"),
+         condition = NULL) {
+
+  method <- match.arg(method)
+
+  group_col <- ensym(group_col)
+  date_col <- ensym(date_col)
+  ref_date_col <- ensym(ref_date_col)
+  required_col <- ensym(required_col)
+  analysis_col <- ensym(analysis_col)
+  cond <- enquo(condition)
+
+  if (!quo_is_null(cond)) {
+    df <- df %>% filter(eval_tidy(cond, data = df))
+  }
+
+  df %>%
+    mutate(
+      !!date_col := parse_date_time(!!date_col, orders = c("ymd HMS", "ymd HM", "ymd")),
+      !!ref_date_col := parse_date_time(!!ref_date_col, orders = c("ymd HMS", "ymd HM", "ymd")),
+      .row_id = row_number()
+    ) %>%
+    group_by(across(all_of(group_col))) %>%
+    mutate(
+      eligible =
+        !is.na(.data[[required_col]]) &
+        .data[[date_col]] <= .data[[ref_date_col]]
+    ) %>%
+
+    # ---- method: max row id ----
+  {
+    if (method == "max_rowid") {
+      mutate(
+        .,
+        max_row_id = max(.row_id[eligible], na.rm = TRUE),
+        is_latest = eligible & .row_id == max_row_id
+      )
+    } else {
+      if (quo_is_null(analysis_col)) {
+        stop("analysis_col must be supplied when method = 'avg_analysis'")
+      }
+      mutate(
+        .,
+        avg_analysis_value = mean(.data[[analysis_col]][eligible], na.rm = TRUE),
+        is_latest = FALSE
+      )
+    }
+  } %>%
+    ungroup() %>%
+    select(-eligible, -.row_id, -any_of("max_row_id"))
 }
 
 
