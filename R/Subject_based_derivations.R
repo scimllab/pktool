@@ -81,7 +81,7 @@ basechar <-function(df,
   date_col <- ensym(date_col)
   ref_date_col <- ensym(ref_date_col)
   required_col <- ensym(required_col)
-  analysis_col <- ensym(analysis_col)
+  analysis_col <- enquo(analysis_col)
   cond <- enquo(condition)
 
   if (!quo_is_null(cond)) {
