@@ -2,6 +2,7 @@
 
 export(add_units_to_varnames)
 export(basechar)
+export(basechar_old)
 export(cg_creatinine_clearance)
 export(compute_TAD_from_PCTPT)
 export(compute_first_dose)
