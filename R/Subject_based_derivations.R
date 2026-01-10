@@ -106,7 +106,7 @@ basechar <-function(df,
     if (method == "max_rowid") {
       mutate(
         .,
-        max_row_id = if (any(eligible)) { max(.row_id[eligible], na.rm = TRUE)} else {
+        max_row_id = if (any(eligible, na.rm=TRUE)) { max(.row_id[eligible], na.rm = TRUE)} else {
           NA_real_
         },
         is_latest = eligible & .row_id == max_row_id
